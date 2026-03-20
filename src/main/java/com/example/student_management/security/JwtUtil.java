@@ -18,11 +18,18 @@ public class JwtUtil {
                 .map(Role::getName)
                 .toList();
 
+        if (roles.contains("ROLE_ADMIN")) {
         return Jwts.builder()
-                .setSubject(user.getUsername())
-                //.setSubject()
-                .claim("roles", roles)
-                .signWith(SignatureAlgorithm.HS256, secret)
-                .compact();
+            .setSubject("ADMIN")
+            .claim("roles", roles)
+            .signWith(SignatureAlgorithm.HS256, secret)
+            .compact();
+        } else {
+        return Jwts.builder()
+            .setSubject(user.getUsername()) 
+            .claim("roles", roles)
+            .signWith(SignatureAlgorithm.HS256, secret)
+            .compact();
+        }
     }
 }
