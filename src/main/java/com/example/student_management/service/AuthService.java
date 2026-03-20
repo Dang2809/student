@@ -17,7 +17,7 @@ public class AuthService {
 
     public String login(String username, String password) {
     User user = repo.findByUsername(username)
-            .orElseThrow(() -> new RuntimeException("User không tồn tại"));
+            .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
 
             //
     if (!user.getPassword().equals(password)) {

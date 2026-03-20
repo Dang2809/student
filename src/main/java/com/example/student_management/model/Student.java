@@ -3,6 +3,7 @@ package com.example.student_management.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
 import java.time.LocalDate;
 
@@ -14,17 +15,21 @@ public class Student {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
+    @NotBlank(message = "Họ và tên không được để trống")
     @Column(name = "full_name")
     private String fullName;
 
-    @Pattern(regexp = "MALE|FEMALE|OTHER")
+    @NotNull(message = "Giới tính không được để trống")
+    @Pattern(regexp = "MALE|FEMALE|OTHER" ,message = "Giới tính chỉ được phép là MALE, FEMALE hoặc OTHER")
     private String gender;
 
-    @NotNull
+    @NotNull(message = "Ngày sinh không được để trống")
+    @Past(message = "Ngày sinh phải là ngày trong quá khứ")
+    
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
+    @NotBlank(message = "Địa chỉ không được để trống")
     private String address;
 
     @OneToOne
