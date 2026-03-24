@@ -17,14 +17,16 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http.csrf(csrf -> csrf.disable())
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/auth/**").permitAll()
-            .requestMatchers("/students/**").authenticated() 
-            .anyRequest().authenticated()
-        )
-        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+        http.csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/login").permitAll()      // cho phép login không cần token
+                .requestMatchers("/register").permitAll()   //cho phép register không cần token
+                .requestMatchers("/auth/**").permitAll()    // cho phép các API auth khác
+                .requestMatchers("/students/**").authenticated() 
+                .anyRequest().authenticated()
+            )
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
-    return http.build();
+        return http.build();
     }
 }
