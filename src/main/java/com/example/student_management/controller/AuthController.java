@@ -5,6 +5,7 @@ import com.example.student_management.service.AuthService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin(origins = "http://localhost:5173") // frontend port
 @RestController
 @RequestMapping("/auth")
 public class AuthController {

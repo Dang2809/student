@@ -2,15 +2,14 @@ package com.example.student_management.controller;
 
 import com.example.student_management.model.Student;
 import com.example.student_management.service.StudentService;
+import com.example.student_management.dto.StudentResponse;
+import com.example.student_management.dto.StudentListResponse;
+import com.example.student_management.dto.DeleteResponse;
 
 import jakarta.validation.Valid;
-
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/students")
@@ -22,81 +21,35 @@ public class StudentController {
     }
 
     @PostMapping
-    public Map<String, Object> create(@Valid @RequestBody Student s, @RequestParam Long userId) {
+    public StudentResponse create(@Valid @RequestBody Student s, @RequestParam Long userId) {
         Student saved = service.create(s, userId);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Tạo sinh viên thành công");
-        response.put("id", saved.getId());
-        response.put("fullName", saved.getFullName());
-        response.put("gender", saved.getGender());
-        response.put("dateOfBirth", saved.getDateOfBirth());
-        response.put("address", saved.getAddress());
-
-        return response;
+        return new StudentResponse("Tạo sinh viên thành công", saved);
     }
 
     @GetMapping("/{id}")
-    public Map<String, Object> getById(@PathVariable Long id) {
+    public StudentResponse getById(@PathVariable Long id) {
         Student student = service.getById(id);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Lấy thông tin sinh viên thành công");
-        response.put("id", student.getId());
-        response.put("fullName", student.getFullName());
-        response.put("gender", student.getGender());
-        response.put("dateOfBirth", student.getDateOfBirth());
-        response.put("address", student.getAddress());
-
-        return response;
+        return new StudentResponse("Lấy thông tin sinh viên thành công", student);
     }
 
     @GetMapping
-    public Map<String, Object> getAll() {
+    public StudentListResponse getAll() {
         List<Student> students = service.getAll();
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Lấy danh sách sinh viên thành công");
-
-        // Trả về danh sách theo từng trường
-        List<Map<String, Object>> studentList = new ArrayList<>();
-        for (Student st : students) {
-            Map<String, Object> studentMap = new HashMap<>();
-            studentMap.put("id", st.getId());
-            studentMap.put("fullName", st.getFullName());
-            studentMap.put("gender", st.getGender());
-            studentMap.put("dateOfBirth", st.getDateOfBirth());
-            studentMap.put("address", st.getAddress());
-            studentList.add(studentMap);
-        }
-        response.put("data", studentList);
-
-        return response;
+        List<StudentResponse> studentResponses = students.stream()
+                .map(st -> new StudentResponse(null, st))
+                .toList();
+        return new StudentListResponse("Lấy danh sách sinh viên thành công", studentResponses);
     }
 
     @PutMapping("/{id}")
-    public Map<String, Object> update(@Valid @PathVariable Long id, @Valid @RequestBody Student s) {
+    public StudentResponse update(@Valid @PathVariable Long id, @Valid @RequestBody Student s) {
         Student updated = service.update(id, s);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Cập nhật sinh viên thành công");
-        response.put("id", updated.getId());
-        response.put("fullName", updated.getFullName());
-        response.put("gender", updated.getGender());
-        response.put("dateOfBirth", updated.getDateOfBirth());
-        response.put("address", updated.getAddress());
-
-        return response;
+        return new StudentResponse("Cập nhật sinh viên thành công", updated);
     }
 
     @DeleteMapping("/{id}")
-    public Map<String, Object> delete(@PathVariable Long id) {
+    public DeleteResponse delete(@PathVariable Long id) {
         service.delete(id);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Xóa sinh viên thành công");
-        response.put("id", id);
-
-        return response;
+        return new DeleteResponse("Xóa sinh viên thành công", id);
     }
 }

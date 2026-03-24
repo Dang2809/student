@@ -52,9 +52,11 @@ public class StudentService {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     String username = auth.getName();
 
+    //Kiểm tra user có trong DB hay không
     User currentUser = userRepo.findByUsername(username)
             .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
 
+    //Kiểm tra sinh viên có trong DB hay không 
     Student student = repo.findById(id)
             .orElseThrow(() -> new RuntimeException("Sinh viên này không tồn tại"));
 
@@ -86,6 +88,7 @@ public class StudentService {
 }
 
     public Student update(Long id, Student s) {
+    // Lấy thông tin người đang đăng nhập từ token
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
     boolean isAdmin = auth.getAuthorities().stream()
@@ -107,8 +110,11 @@ public class StudentService {
     public void delete(Long id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        boolean isAdmin = auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        // Kiểm tra xem người dùng hiện tại có quyền ROLE_ADMIN hay không
+        boolean isAdmin = auth.getAuthorities().stream() // Lấy danh sách tất cả quyền của user
+        .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")); 
+        // Duyệt qua danh sách quyền, nếu có ít nhất một quyền bằng "ROLE_ADMIN" thì trả về true
+
 
         if (!isAdmin) {
             throw new RuntimeException("Người dùng không có quyền xóa sinh viên");
