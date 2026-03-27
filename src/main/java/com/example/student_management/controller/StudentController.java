@@ -7,6 +7,7 @@ import com.example.student_management.dto.StudentListResponse;
 import com.example.student_management.dto.DeleteResponse;
 
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 import java.util.HashMap;
@@ -34,6 +35,13 @@ public class StudentController {
         Student student = service.getById(id);
         return new StudentResponse("Lấy thông tin sinh viên thành công", student);
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<StudentResponse> getStudentByName(@RequestParam String name) {
+        Student student = service.getStudentByName(name);
+        return ResponseEntity.ok(new StudentResponse("Lấy thông tin sinh viên thành công", student));
+    }
+
 
     @GetMapping
     public StudentListResponse getAll() {

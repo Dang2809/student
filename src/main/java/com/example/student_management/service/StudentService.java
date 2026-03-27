@@ -37,7 +37,7 @@ public class StudentService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Người dùng không được phép tạo sinh viên");
         }
 
-        if (repo.findAll().stream().anyMatch(st -> st.getUser().getId().equals(userId))) {
+            if (repo.findAll().stream().anyMatch(st -> st.getUser().getId().equals(userId))) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Người dùng này đã có thông tin sinh viên");
         }
 
@@ -53,6 +53,27 @@ public class StudentService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Người dùng không tồn tại"));
 
         Student student = repo.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sinh viên này không tồn tại"));
+
+        boolean isAdmin = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!isAdmin && !student.getUser().getId().equals(currentUser.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Người dùng không có quyền xem thông tin sinh viên này");
+        }
+
+        return student;
+    }
+
+    public Student getStudentByName(String name) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+
+        User currentUser = userRepo.findByUsername(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Người dùng không tồn tại"));
+
+        Student student = repo.findByFullName(name)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sinh viên này không tồn tại"));
 
         boolean isAdmin = auth.getAuthorities().stream()
