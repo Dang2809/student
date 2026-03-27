@@ -24,7 +24,7 @@ public class JwtUtil {
         // Nếu user có role là ADMIN thì subject sẽ là "ADMIN"
         if (roles.contains("ROLE_ADMIN")) {
             return Jwts.builder()
-                .setSubject("ADMIN") // subject là ADMIN
+                .setSubject(user.getUsername())// subject là ADMIN
                 .claim("roles", roles) // thêm claim roles vào token
                 .signWith(SignatureAlgorithm.HS256, secret) // ký token bằng thuật toán HS256 và secret key
                 .compact(); // tạo token dạng chuỗi
@@ -32,7 +32,8 @@ public class JwtUtil {
             // Nếu không phải ADMIN thì subject là username của user
             return Jwts.builder()
                 .setSubject(user.getUsername()) // subject là username
-                .claim("roles", roles) // thêm claim roles vào token
+                    .claim("roles", roles)// thêm claim roles vào token
+                    .claim("userId", user.getId())
                 .signWith(SignatureAlgorithm.HS256, secret) // ký token
                 .compact(); // tạo token
         }

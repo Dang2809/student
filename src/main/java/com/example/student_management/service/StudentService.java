@@ -5,12 +5,13 @@ import com.example.student_management.model.User;
 import com.example.student_management.repository.StudentRepository;
 import com.example.student_management.repository.UserRepository;
 
-import jakarta.persistence.EntityNotFoundException;
-
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
+import java.util.Map;
+import java.util.HashMap;
 
 import java.util.List;
 
@@ -25,104 +26,96 @@ public class StudentService {
     }
 
     public Student create(Student s, Long userId) {
-    // Lấy user từ DB theo userId (student sẽ gắn với user này)
-    User targetUser = userRepo.findById(userId)
-            .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+        User targetUser = userRepo.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Người dùng không tồn tại"));
 
-    // Lấy thông tin người đang đăng nhập từ token
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
-    boolean isAdmin = auth.getAuthorities().stream()
-            .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        if (!isAdmin) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Người dùng không được phép tạo sinh viên");
+        }
 
-    if (!isAdmin) {
-        throw new RuntimeException("Người dùng không được phép tạo sinh viên");
+        if (repo.findAll().stream().anyMatch(st -> st.getUser().getId().equals(userId))) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Người dùng này đã có thông tin sinh viên");
+        }
+
+        s.setUser(targetUser);
+        return repo.save(s);
     }
-
-    // Kiểm tra user đã có student chưa
-    if (repo.findAll().stream()
-            .anyMatch(st -> st.getUser().getId().equals(userId))) {
-        throw new RuntimeException("Người dùng này đã có thông tin sinh viên");
-    }
-    s.setUser(targetUser);
-    return repo.save(s);
-}   
 
     public Student getById(Long id) {
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    String username = auth.getName();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
 
-    //Kiểm tra user có trong DB hay không
-    User currentUser = userRepo.findByUsername(username)
-            .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+        User currentUser = userRepo.findByUsername(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Người dùng không tồn tại"));
 
-    //Kiểm tra sinh viên có trong DB hay không 
-    Student student = repo.findById(id)
-            .orElseThrow(() -> new RuntimeException("Sinh viên này không tồn tại"));
+        Student student = repo.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sinh viên này không tồn tại"));
 
-    boolean isAdmin = auth.getAuthorities().stream()
-            .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        boolean isAdmin = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
-    // Bỏ qua kiểm tra quyền sở hữu nếu user có role ADMIN
-    if (isAdmin) {
+        if (!isAdmin && !student.getUser().getId().equals(currentUser.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Người dùng không có quyền xem thông tin sinh viên này");
+        }
+
         return student;
     }
 
-    // Nếu là USER thì chỉ được xem student của chính mình
-    if (!student.getUser().getId().equals(currentUser.getId())) {
-        throw new RuntimeException("Người dùng không có quyền xem thông tin sinh viên này");
-    }
-    return student;
-}
-
     public List<Student> getAll() {
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
-    boolean isAdmin = auth.getAuthorities().stream()
-            .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-
-    if (!isAdmin) {
-        throw new RuntimeException("Người dùng không có quyền xem danh sách sinh viên");
+        if (!isAdmin) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Người dùng không có quyền xem danh sách sinh viên");
+        }
+        return repo.findAll();
     }
-    return repo.findAll();
-}
 
     public Student update(Long id, Student s) {
-    // Lấy thông tin người đang đăng nhập từ token
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
-    boolean isAdmin = auth.getAuthorities().stream()
-            .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        if (!isAdmin) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Người dùng không có quyền sửa thông tin sinh viên");
+        }
 
-    if (!isAdmin) {
-        throw new RuntimeException("Người dùng không có quyền sửa thông tin sinh viên");
+        Student existing = repo.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sinh viên này không tồn tại"));
+
+        existing.setFullName(s.getFullName());
+        existing.setGender(s.getGender());
+        existing.setDateOfBirth(s.getDateOfBirth());
+        existing.setAddress(s.getAddress());
+        return repo.save(existing);
     }
-
-    Student existing = repo.findById(id)
-            .orElseThrow(() -> new RuntimeException("Sinh viên này không tồn tại"));
-    existing.setFullName(s.getFullName());
-    existing.setGender(s.getGender());
-    existing.setDateOfBirth(s.getDateOfBirth());
-    existing.setAddress(s.getAddress());
-    return repo.save(existing);
-}
 
     public void delete(Long id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        // Kiểm tra xem người dùng hiện tại có quyền ROLE_ADMIN hay không
-        boolean isAdmin = auth.getAuthorities().stream() // Lấy danh sách tất cả quyền của user
-        .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")); 
-        // Duyệt qua danh sách quyền, nếu có ít nhất một quyền bằng "ROLE_ADMIN" thì trả về true
-
+        boolean isAdmin = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
         if (!isAdmin) {
-            throw new RuntimeException("Người dùng không có quyền xóa sinh viên");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Người dùng không có quyền xóa sinh viên");
         }
 
         if (!repo.existsById(id)) {
-            throw new EntityNotFoundException("Không thể xóa do ID của sinh viên " + id + " không tồn tại");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không thể xóa do ID sinh viên " + id + " không tồn tại");
         }
+
         repo.deleteById(id);
+    }
+
+    public Map<String, Object> getStats() {
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("total", repo.count());
+        stats.put("male", repo.countByGender("MALE"));
+        stats.put("female", repo.countByGender("FEMALE"));
+        return stats;
     }
 }

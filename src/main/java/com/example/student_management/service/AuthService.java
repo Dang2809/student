@@ -7,6 +7,8 @@ import com.example.student_management.repository.UserRepository;
 import com.example.student_management.security.JwtUtil;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Set;
 
@@ -24,17 +26,20 @@ public class AuthService {
         this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
+
     public String login(String username, String password) {
         User user = userRepo.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Người dùng không tồn tại"));
 
-        // So sánh mật khẩu thô với mật khẩu đã mã hóa trong DB
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("Sai tài khoản hoặc mật khẩu");
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "Sai tài khoản hoặc mật khẩu");
         }
 
         return jwt.generateToken(user);
     }
+
 
     public void register(String username, String password) {
         User user = new User();
@@ -63,7 +68,6 @@ public class AuthService {
     // Thêm role ADMIN
     roles.add(adminRole);
     user.setRoles(roles);
-
     userRepo.save(user);
 } 
 }

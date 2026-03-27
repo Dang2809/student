@@ -8,9 +8,12 @@ import com.example.student_management.dto.DeleteResponse;
 
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+import java.util.Map;
+import java.util.HashMap;
 
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/students")
 public class StudentController {
@@ -51,5 +54,10 @@ public class StudentController {
     public DeleteResponse delete(@PathVariable Long id) {
         service.delete(id);
         return new DeleteResponse("Xóa sinh viên thành công", id);
+    }
+
+    @GetMapping("/stats")
+    public Map<String, Object> getStats() {
+        return service.getStats();
     }
 }
