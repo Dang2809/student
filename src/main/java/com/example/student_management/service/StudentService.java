@@ -65,7 +65,7 @@ public class StudentService {
         return student;
     }
 
-    public Student getStudentByName(String name) {
+    public Student getByName(String name) {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();

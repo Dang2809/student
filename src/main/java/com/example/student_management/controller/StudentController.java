@@ -38,7 +38,7 @@ public class StudentController {
 
     @GetMapping("/search")
     public ResponseEntity<StudentResponse> getStudentByName(@RequestParam String name) {
-        Student student = service.getStudentByName(name);
+        Student student = service.getByName(name);
         return ResponseEntity.ok(new StudentResponse("Lấy thông tin sinh viên thành công", student));
     }
 
@@ -68,4 +68,6 @@ public class StudentController {
     public Map<String, Object> getStats() {
         return service.getStats();
     }
+
+
 }

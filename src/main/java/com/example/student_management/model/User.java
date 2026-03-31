@@ -13,6 +13,8 @@ public class User {
 
     private String username;
     private String password;
+    // Thêm thuộc tính status
+    private String status; // ACTIVE, PENDING, REJECTED
 
     @ManyToMany
     @JoinTable(
@@ -30,6 +32,9 @@ public class User {
 
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
     public Set<Role> getRoles() { return roles; }
     public void setRoles(Set<Role> roles) { this.roles = roles; }

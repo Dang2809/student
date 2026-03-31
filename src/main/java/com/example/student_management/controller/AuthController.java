@@ -1,9 +1,11 @@
 package com.example.student_management.controller;
 
 import com.example.student_management.service.AuthService;
-
+import com.example.student_management.model.User;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
 
 @CrossOrigin(origins = "http://localhost:5173") // frontend port
 @RestController
@@ -54,5 +56,26 @@ public class AuthController {
     public String promoteToAdmin(@PathVariable String username) {
         service.promoteToAdmin(username);
         return "Người dùng " + username + " đã được nâng thành ADMIN!";
+    }
+    // API dành cho admin: duyệt tài khoản user (chuyển status từ PENDING sang ACTIVE)
+    @PostMapping("/approve/{username}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String approveUser(@PathVariable String username) {
+        service.approveUser(username);
+        return "Người dùng " + username + " đã được duyệt!";
+    }
+
+    // API dành cho admin: từ chối tài khoản user (chuyển status từ PENDING sang REJECTED)
+    @PostMapping("/reject/{username}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String rejectUser(@PathVariable String username) {
+        service.rejectUser(username);
+        return "Người dùng " + username + " đã bị từ chối!";
+    }
+
+    @GetMapping("/users")
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<User> getAllUsers() {
+        return service.getAllUsers();
     }
 }

@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Set;
+import java.util.List;
+
 
 @Service
 public class AuthService {
@@ -36,7 +38,19 @@ public class AuthService {
             throw new ResponseStatusException(
                     HttpStatus.UNAUTHORIZED, "Sai tài khoản hoặc mật khẩu");
         }
-
+        // Kiểm tra trạng thái của user trước khi cho phép đăng nhập
+        if ("PENDING".equals(user.getStatus())) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN, "Tài khoản của bạn đang chờ duyệt");
+        }
+        if ("REJECTED".equals(user.getStatus())) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN, "Tài khoản của bạn đã bị từ chối");
+        }
+        if (!"ACTIVE".equals(user.getStatus())) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN, "Trạng thái tài khoản không hợp lệ");
+        }
         return jwt.generateToken(user);
     }
 
@@ -51,6 +65,7 @@ public class AuthService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy role mặc định"));
 
         user.setRoles(Set.of(defaultRole));
+        user.setStatus("PENDING");
         userRepo.save(user);
     }
 
@@ -69,5 +84,23 @@ public class AuthService {
     roles.add(adminRole);
     user.setRoles(roles);
     userRepo.save(user);
-} 
+    }
+
+    public void approveUser(String username) {
+        User user = userRepo.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User không tồn tại"));
+        user.setStatus("ACTIVE");
+        userRepo.save(user);
+    }
+
+    public void rejectUser(String username) {
+        User user = userRepo.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User không tồn tại"));
+        user.setStatus("REJECTED");
+        userRepo.save(user);
+    }
+
+    public List<User> getAllUsers() {
+        return userRepo.findAll();
+    }
 }
