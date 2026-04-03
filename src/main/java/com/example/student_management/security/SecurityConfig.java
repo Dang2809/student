@@ -37,10 +37,13 @@ public class SecurityConfig {
 
                         // public API
                         .requestMatchers("/login", "/register", "/auth/**").permitAll()
+                        .requestMatchers("/students/stats").permitAll()
+                        .requestMatchers("/students/me").permitAll()
 
                         // cần login
-                        .requestMatchers("/students/stats").permitAll()
                         .requestMatchers("/students/**").authenticated()
+                        .requestMatchers("/subjects/**").authenticated()
+                        .requestMatchers("/points/**").authenticated()
                         .anyRequest().authenticated()
                 )
 

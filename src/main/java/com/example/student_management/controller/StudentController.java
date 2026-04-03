@@ -42,6 +42,11 @@ public class StudentController {
         return ResponseEntity.ok(new StudentResponse("Lấy thông tin sinh viên thành công", student));
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<Student> getMyStudent() {
+        Student student = service.getMyStudent();
+        return ResponseEntity.ok(student);
+    }
 
     @GetMapping
     public StudentListResponse getAll() {

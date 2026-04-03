@@ -86,6 +86,18 @@ public class StudentService {
         return student;
     }
 
+    // Lấy student của chính user hiện tại (không cần truyền userId)
+    public Student getMyStudent() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+
+        User currentUser = userRepo.findByUsername(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Người dùng không tồn tại"));
+
+        return repo.findByUserId(currentUser.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Người dùng này chưa có thông tin sinh viên"));
+    }
+
     public List<Student> getAll() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isAdmin = auth.getAuthorities().stream()

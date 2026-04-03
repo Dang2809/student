@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface StudentRepository extends JpaRepository<Student, Long> {
     long countByGender(String gender);
     Optional<Student> findByFullName(String fullName);
+    Optional<Student> findByUserId(Long userId);
 }
