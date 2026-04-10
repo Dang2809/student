@@ -48,6 +48,13 @@ public class PointService {
                 .toList();
     }
 
+    public List<PointResponse> getByStudentAndSemester(Long studentId, Integer semester) {
+        return repo.findByStudentIdAndSubjectSemester(studentId, semester)
+                .stream()
+                .map(PointResponse::new)
+                .toList();
+    }
+
     public Point findById(Long pointId) {
         return repo.findById(pointId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy điểm"));

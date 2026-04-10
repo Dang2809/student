@@ -10,4 +10,7 @@ import java.util.List;
 public interface PointRepository extends JpaRepository<Point, Long> {
     List<Point> findByStudentId(Long studentId);
     boolean existsByStudentIdAndSubject_Id(Long studentId, Long subjectId);
+    List<Point> findByStudentIdAndSubjectSemester(Long studentId, Integer semester);
+
+
 }

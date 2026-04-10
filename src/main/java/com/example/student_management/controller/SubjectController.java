@@ -1,10 +1,10 @@
 package com.example.student_management.controller;
 
+import com.example.student_management.dto.ApiResponse;
 import com.example.student_management.model.Subject;
 import com.example.student_management.service.SubjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
@@ -14,27 +14,41 @@ public class SubjectController {
     @Autowired
     private SubjectService service;
 
+    // Tạo môn học mới
     @PostMapping
-    public Subject create(@RequestBody Subject s) {
-        return service.create(s);
+    public ApiResponse<Subject> create(@RequestBody Subject s) {
+        Subject created = service.create(s);
+        return new ApiResponse<>(200, "Tạo môn học thành công", created);
     }
 
+    // Lấy tất cả môn học
     @GetMapping
-    public List<Subject> getAll() {
-        return service.getAll();
+    public ApiResponse<List<Subject>> getAll() {
+        List<Subject> subjects = service.getAll();
+        return new ApiResponse<>(200, "Lấy danh sách môn học thành công", subjects);
     }
 
+    // Lấy môn học theo ID
     @GetMapping("/{id}")
-    public ResponseEntity<Subject> getSubjectById(@PathVariable Long id) {
+    public ApiResponse<Subject> getSubjectById(@PathVariable Long id) {
         Subject subject = service.getSubjectById(id);
-        return ResponseEntity.ok(subject);
+        return new ApiResponse<>(200, "Lấy môn học thành công", subject);
     }
 
+    // Cập nhật môn học
     @PutMapping("/{id}")
-    public ResponseEntity<Subject> updateSubject(
+    public ApiResponse<Subject> updateSubject(
             @PathVariable Long id,
             @RequestBody Subject updatedSubject) {
         Subject subject = service.updateSubject(id, updatedSubject);
-        return ResponseEntity.ok(subject);
+        return new ApiResponse<>(200, "Cập nhật môn học thành công", subject);
     }
+
+    // Xóa môn học theo ID
+    @DeleteMapping("/{id}")
+    public ApiResponse<Void> deleteSubject(@PathVariable Long id) {
+        service.deleteSubject(id);
+        return new ApiResponse<>(200, "Xóa môn học thành công", null);
+    }
+
 }
