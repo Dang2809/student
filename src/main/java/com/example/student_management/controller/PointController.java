@@ -2,9 +2,9 @@ package com.example.student_management.controller;
 
 import com.example.student_management.dto.PointResponse;
 import com.example.student_management.model.Point;
-import com.example.student_management.model.Subject;
 import com.example.student_management.repository.SubjectRepository;
 import com.example.student_management.service.PointService;
+import com.example.student_management.dto.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,34 +20,49 @@ public class PointController {
     @Autowired
     private SubjectRepository subjectRepo;
 
+    // Tạo điểm mới
     @PostMapping
-    public PointResponse create(@RequestBody Point p, @RequestParam Long subjectId) {
+    public ApiResponse<PointResponse> create(@RequestBody Point p, @RequestParam Long subjectId) {
         Point saved = service.create(p, subjectId);
-        return new PointResponse(saved);
+        return new ApiResponse<>(200, "Tạo điểm thành công", new PointResponse(saved));
     }
+
+    // Lấy bảng điểm theo sinh viên
+    /**@GetMapping("/student/{id}")
+    public ApiResponse<List<PointResponse>> getByStudent(@PathVariable Long id) {
+        List<PointResponse> points = service.getByStudent(id);
+        return new ApiResponse<>(200, "Lấy bảng điểm thành công", points);
+    }**/
 
     @GetMapping("/student/{id}")
-    public List<PointResponse> getByStudent(@PathVariable Long id) {
-        return service.getByStudent(id);
+    public ApiResponse<List<PointResponse>> getByStudent(
+            @PathVariable Long id,
+            @RequestParam(required = false) Integer semester) {
+        List<PointResponse> points = (semester == null)
+                ? service.getByStudent(id)
+                : service.getByStudentAndSemester(id, semester);
+        return new ApiResponse<>(200, "Lấy bảng điểm thành công", points);
     }
 
-    // Lấy điểm theo pointId (để hiển thị form sửa)
+
+    // Lấy điểm theo pointId
     @GetMapping("/{pointId}")
-    public PointResponse getPoint(@PathVariable Long pointId) {
+    public ApiResponse<PointResponse> getPoint(@PathVariable Long pointId) {
         Point point = service.findById(pointId);
-        return new PointResponse(point);
+        return new ApiResponse<>(200, "Lấy điểm thành công", new PointResponse(point));
     }
 
-    // Sửa điểm (dùng trực tiếp Point làm input)
+    // Sửa điểm
     @PutMapping("/{pointId}")
-    public PointResponse updatePoint(@PathVariable Long pointId, @RequestBody Point p) {
+    public ApiResponse<PointResponse> updatePoint(@PathVariable Long pointId, @RequestBody Point p) {
         Point updated = service.update(pointId, p);
-        return new PointResponse(updated);
+        return new ApiResponse<>(200, "Cập nhật điểm thành công", new PointResponse(updated));
     }
 
-    // Xóa điểm theo ID
+    // Xóa điểm
     @DeleteMapping("/{pointId}")
-    public void deletePoint(@PathVariable Long pointId) {
+    public ApiResponse<Long> deletePoint(@PathVariable Long pointId) {
         service.delete(pointId);
+        return new ApiResponse<>(200, "Xóa điểm thành công", pointId);
     }
 }

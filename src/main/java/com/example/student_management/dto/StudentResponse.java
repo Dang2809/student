@@ -11,7 +11,7 @@ public class StudentResponse {
     private String address;
     private Long userId;
 
-    public StudentResponse(String message, Student student) {
+    public StudentResponse(Student student) {
         this.id = student.getId();
         this.fullName = student.getFullName();
         this.gender = student.getGender();

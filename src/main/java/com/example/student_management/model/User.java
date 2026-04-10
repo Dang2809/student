@@ -1,5 +1,6 @@
 package com.example.student_management.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.Set;
 
@@ -12,6 +13,8 @@ public class User {
     private Long id;
 
     private String username;
+
+    @JsonIgnore
     private String password;
     // Thêm thuộc tính status
     private String status; // ACTIVE, PENDING, REJECTED

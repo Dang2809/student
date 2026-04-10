@@ -144,11 +144,26 @@ public class StudentService {
         repo.deleteById(id);
     }
 
+    // Lấy thống kê tổng quan
     public Map<String, Object> getStats() {
         Map<String, Object> stats = new HashMap<>();
         stats.put("total", repo.count());
         stats.put("male", repo.countByGender("MALE"));
         stats.put("female", repo.countByGender("FEMALE"));
         return stats;
+    }
+
+    // Lấy top 10 địa chỉ
+    public List<Map<String, Object>> getTopAddresses() {
+        List<Object[]> results = repo.findTopAddresses();
+        return results.stream()
+                .limit(5)
+                .map(r -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("address", (String) r[0]);
+                    map.put("count", (Long) r[1]);
+                    return map;
+                })
+                .toList();
     }
 }

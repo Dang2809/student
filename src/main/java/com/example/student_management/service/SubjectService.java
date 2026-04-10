@@ -34,4 +34,13 @@ public class SubjectService {
         subject.setRatioExam(updatedSubject.getRatioExam());
         return repo.save(subject);
     }
+
+    // Xóa môn học
+    public void deleteSubject(Long id) {
+        if (!repo.existsById(id)) {
+            throw new RuntimeException("Không tìm thấy môn học để xóa");
+        }
+        repo.deleteById(id);
+    }
+
 }
