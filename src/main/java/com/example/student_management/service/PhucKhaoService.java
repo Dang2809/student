@@ -51,16 +51,17 @@ public class PhucKhaoService {
     }
 
     public List<PhucKhaoResponse> listByStudent(Long studentId) {
-        return repo.findByStudentId(studentId).stream()
+        /**return repo.findByStudentId(studentId).stream()
                 .map(PhucKhaoResponse::new)
-                .toList();
+                .toList();**/
+        return repo.findByStudentIdWithSummary(studentId);
     }
 
-    public List<PhucKhaoResponse> listPending() {
+    /**public List<PhucKhaoResponse> listPending() {
         return repo.findByStatus(PhucKhao.Status.PENDING).stream()
                 .map(PhucKhaoResponse::new)
                 .toList();
-    }
+    }**/
 
     public List<PhucKhaoResponse> listAll() {
         return repo.findAll().stream()

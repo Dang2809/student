@@ -10,6 +10,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
+
 import java.util.Map;
 import java.util.HashMap;
 
@@ -25,6 +28,7 @@ public class StudentService {
         this.userRepo = userRepo;
     }
 
+    @CacheEvict(value = "students", allEntries = true)
     public Student create(Student s, Long userId) {
         User targetUser = userRepo.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Người dùng không tồn tại"));
@@ -39,6 +43,15 @@ public class StudentService {
 
             if (repo.findAll().stream().anyMatch(st -> st.getUser().getId().equals(userId))) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Người dùng này đã có thông tin sinh viên");
+        }
+
+        // Check email
+        if (repo.existsByEmail(s.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email đã tồn tại");
+        }
+
+        if (repo.existsByPhone(s.getPhone())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Số điện thoại đã tồn tại");
         }
 
         s.setUser(targetUser);
@@ -98,7 +111,10 @@ public class StudentService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Người dùng này chưa có thông tin sinh viên"));
     }
 
+    @Cacheable("students")
     public List<Student> getAll() {
+
+        System.out.println("LOAD FROM MYSQL");
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isAdmin = auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
@@ -109,6 +125,7 @@ public class StudentService {
         return repo.findAll();
     }
 
+    @CacheEvict(value = "students", allEntries = true)
     public Student update(Long id, Student s) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isAdmin = auth.getAuthorities().stream()
@@ -125,9 +142,12 @@ public class StudentService {
         existing.setGender(s.getGender());
         existing.setDateOfBirth(s.getDateOfBirth());
         existing.setAddress(s.getAddress());
+        existing.setEmail(s.getEmail());
+        existing.setPhone(s.getPhone());
         return repo.save(existing);
     }
 
+    @CacheEvict(value = "students", allEntries = true)
     public void delete(Long id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isAdmin = auth.getAuthorities().stream()
@@ -153,7 +173,7 @@ public class StudentService {
         return stats;
     }
 
-    // Lấy top 10 địa chỉ
+    // Lấy top 5 địa chỉ
     public List<Map<String, Object>> getTopAddresses() {
         List<Object[]> results = repo.findTopAddresses();
         return results.stream()

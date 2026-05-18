@@ -12,9 +12,12 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     long countByGender(String gender);
     Optional<Student> findByFullName(String fullName);
     Optional<Student> findByUserId(Long userId);
+    boolean existsByEmail(String email);
+    boolean existsByPhone(String phone);
 
-
-    @Query("SELECT s.address, COUNT(s) FROM Student s WHERE s.address IS NOT NULL GROUP BY s.address ORDER BY COUNT(s) DESC")
+    @Query("SELECT s.address, COUNT(s) " +
+            "FROM Student s " +
+            "WHERE s.address IS NOT NULL GROUP BY s.address " +
+            "ORDER BY COUNT(s) DESC")
     List<Object[]> findTopAddresses();
-
 }

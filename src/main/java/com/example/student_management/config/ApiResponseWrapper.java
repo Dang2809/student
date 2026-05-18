@@ -13,16 +13,16 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 @RestControllerAdvice
 public class ApiResponseWrapper implements ResponseBodyAdvice<Object> {
 
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper; // Dùng để chuyển đổi đối tượng thành JSON
 
     public ApiResponseWrapper(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
+        this.objectMapper = objectMapper; // Inject ObjectMapper từ Spring context
     }
 
     @Override
     public boolean supports(MethodParameter returnType,
                             Class<? extends HttpMessageConverter<?>> converterType) {
-        return true;
+        return true; // Áp dụng cho tất cả response trả về
     }
 
     @Override
@@ -33,34 +33,35 @@ public class ApiResponseWrapper implements ResponseBodyAdvice<Object> {
                                   ServerHttpRequest request,
                                   ServerHttpResponse response) {
 
-        // Nếu đã đúng format rồi → bỏ qua
+        // Nếu body đã là ApiResponse thì giữ nguyên, không wrap lại
         if (body instanceof ApiResponse) {
             return body;
         }
 
-        // Fix lỗi khi return String
+        // Nếu body là String thì phải serialize thủ công để tránh lỗi
         if (body instanceof String) {
             try {
                 return objectMapper.writeValueAsString(
-                        new ApiResponse<>(200, "Success", body)
+                        new ApiResponse<>(200, "Success", body) // Wrap String vào ApiResponse
                 );
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException(e); // Nếu lỗi thì throw RuntimeException
             }
         }
 
-        // Nếu body có phương thức getMessage (ví dụ StudentResponse, DeleteResponse...)
-        String message = "Success";
+        // Nếu body có phương thức getMessage thì lấy message từ đó
+        String message = "Success"; // Mặc định message là "Success"
         try {
-            var method = body.getClass().getMethod("getMessage");
-            Object msgObj = method.invoke(body);
+            var method = body.getClass().getMethod("getMessage"); // Tìm method getMessage
+            Object msgObj = method.invoke(body); // Gọi method để lấy giá trị
             if (msgObj != null) {
-                message = msgObj.toString();
+                message = msgObj.toString(); // Nếu có thì gán vào message
             }
         } catch (Exception ignored) {
-            // không có getMessage → giữ "Success"
+            // Nếu không có getMessage thì giữ nguyên "Success"
         }
 
+        // Trả về ApiResponse với body đã được wrap
         return new ApiResponse<>(200, message, body);
     }
 }

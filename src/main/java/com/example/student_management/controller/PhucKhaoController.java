@@ -29,10 +29,10 @@ public class PhucKhaoController {
         return ResponseEntity.ok(new ApiResponse<>(200, "Danh sách phúc khảo của sinh viên", service.listByStudent(id)));
     }
 
-    @GetMapping("/pending")
+    /**@GetMapping("/pending")
     public ResponseEntity<ApiResponse<List<PhucKhaoResponse>>> listPending() {
         return ResponseEntity.ok(new ApiResponse<>(200, "Danh sách yêu cầu pending", service.listPending()));
-    }
+    }**/
 
     @GetMapping("/all")
     public ResponseEntity<ApiResponse<List<PhucKhaoResponse>>> listAll() {

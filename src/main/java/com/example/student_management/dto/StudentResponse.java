@@ -9,6 +9,8 @@ public class StudentResponse {
     private String gender;
     private LocalDate dateOfBirth;
     private String address;
+    private String email;
+    private String phone;
     private Long userId;
 
     public StudentResponse(Student student) {
@@ -17,6 +19,8 @@ public class StudentResponse {
         this.gender = student.getGender();
         this.dateOfBirth = student.getDateOfBirth();
         this.address = student.getAddress();
+        this.email = student.getEmail();
+        this.phone = student.getPhone();
         this.userId = student.getUser() != null ? student.getUser().getId() : null; // thêm để trả về đúng dữ liệu
     }
 
@@ -26,5 +30,7 @@ public class StudentResponse {
     public String getGender() { return gender; }
     public LocalDate getDateOfBirth() { return dateOfBirth; } // sửa lại kiểu trả về
     public String getAddress() { return address; }
+    public String getEmail() { return email; }
+    public String getPhone() { return phone; }
     public Long getUserId() { return userId; }
 }

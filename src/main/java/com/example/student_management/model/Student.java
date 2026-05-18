@@ -6,10 +6,12 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
 import java.time.LocalDate;
+import java.io.Serializable;//Thêm mới
 
 @Entity
 @Table(name = "student")
-public class Student {
+public class Student implements Serializable { //thêm mới
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,6 +33,17 @@ public class Student {
 
     @NotBlank(message = "Địa chỉ không được để trống")
     private String address;
+
+    @NotBlank(message = "Email không được để trống")
+    @Pattern(
+            regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$",
+            message = "Email không hợp lệ"
+    )
+    @Column(name = "email", unique = true)
+    private String email;
+
+    @Column(name = "phone", unique = true)
+    private String phone;
 
     @OneToOne
     @JoinColumn(name = "user_id", unique = true)
@@ -71,6 +84,16 @@ public class Student {
     public void setAddress(String address) {
         this.address = address;
     }
+
+    public String getEmail() {
+        return email;
+    }
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhone() {return phone;}
+    public void setPhone(String phone) {this.phone = phone;}
 
     public User getUser() {
         return user;
