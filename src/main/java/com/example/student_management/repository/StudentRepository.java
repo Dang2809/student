@@ -20,4 +20,6 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
             "WHERE s.address IS NOT NULL GROUP BY s.address " +
             "ORDER BY COUNT(s) DESC")
     List<Object[]> findTopAddresses();
+
+    
 }

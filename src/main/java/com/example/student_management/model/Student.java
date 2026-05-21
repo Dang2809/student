@@ -12,7 +12,7 @@ import java.io.Serializable;//Thêm mới
 @Table(name = "student")
 public class Student implements Serializable { //thêm mới
     private static final long serialVersionUID = 1L;
-
+ 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

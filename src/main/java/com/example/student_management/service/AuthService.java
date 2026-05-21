@@ -33,9 +33,7 @@ public class AuthService {
         this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
-    // =========================
     // LOGIN
-    // =========================
     public String login(String username, String password) {
 
         User user = userRepo.findByUsername(username)
@@ -72,9 +70,7 @@ public class AuthService {
         return jwt.generateToken(user);
     }
 
-    // =========================
     // REGISTER
-    // =========================
     @CacheEvict(value = "all_users", allEntries = true)
     public void register(String username, String password) {
 
@@ -96,9 +92,7 @@ public class AuthService {
         userRepo.save(user);
     }
 
-    // =========================
     // PROMOTE ADMIN
-    // =========================
     @CacheEvict(value = "all_users", allEntries = true)
     public void promoteToAdmin(String username) {
 
@@ -122,9 +116,7 @@ public class AuthService {
         userRepo.save(user);
     }
 
-    // =========================
     // APPROVE USER
-    // =========================
     @CacheEvict(value = "all_users", allEntries = true)
     public void approveUser(String username) {
 
@@ -137,9 +129,7 @@ public class AuthService {
         userRepo.save(user);
     }
 
-    // =========================
     // REJECT USER
-    // =========================
     @CacheEvict(value = "all_users", allEntries = true)
     public void rejectUser(String username) {
 
@@ -152,9 +142,7 @@ public class AuthService {
         userRepo.save(user);
     }
 
-    // =========================
     // CACHE DANH SÁCH USER
-    // =========================
     @Cacheable(value = "all_users")
     public List<User> getAllUsers() {
 
